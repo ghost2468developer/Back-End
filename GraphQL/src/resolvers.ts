@@ -11,7 +11,7 @@ const resolvers = {
     },
 
     Mutation: {
-        addUser: (_parent, { input }: { input: AddUserInput }): User => {
+        addUser: (_parent: any, { input }: { input: AddUserInput }): User => {
             const id = String(users.length + 1)
             const user = { id, ...input }
             users.push(user)

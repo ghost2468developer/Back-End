@@ -1,6 +1,6 @@
 import express from 'express'
 import { ApolloServer, gql } from 'apollo-server-express'
-import resolvers from './resolvers'
+import resolvers from './src/resolvers'
 
 const typeDefs = gql`
   ${require('fs').readFileSync(require.resolve('./schema.graphql'), 'utf8')}
