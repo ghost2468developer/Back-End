@@ -1,2 +1,0 @@
-## TypeScript
-l;khnl;kjl
