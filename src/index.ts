@@ -55,7 +55,6 @@ app.put('/users/:id', (req: Request, res: Response) => {
 
   if (name) users[userIndex].name = name
   if (email) {
-    // Check if the new email already exists in another user
     const emailExists = users.some(
       (user, index) => user.email === email && index !== userIndex
     )
