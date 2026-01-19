@@ -1,87 +1,74 @@
 import express, { Request, Response } from 'express'
+import { prisma } from './prisma'
 
 const app = express()
 const PORT = 3000
 
 app.use(express.json())
 
-type User = {
-  id: number
-  name: string
-  email: string
-}
-
-let users: User[] = []
-
+// Test route
 app.get('/', (_req: Request, res: Response) => {
-  res.json({ message: 'Server Running' })
+  res.json({ message: 'Express + Prisma server is running!' })
 })
 
-app.post('/users', (req: Request, res: Response) => {
+// CREATE user
+app.post('/users', async (req: Request, res: Response) => {
   const { name, email } = req.body
-  if (!name || !email) {
-    return res.status(400).json({ error: 'Name and email are required' })
-  }
-  if (users.some((user) => user.email === email)) {
-    return res.status(400).json({ error: 'Email already exists' })
-  }
+  if (!name || !email)
+    return res.status(400).json({ error: 'Name and email required' })
 
-  const newUser: User = {
-    id: users.length + 1,
-    name,
-    email
+  try {
+    const user = await prisma.user.create({ data: { name, email } })
+    res.status(201).json(user)
+  } catch (error: any) {
+    if (error.code === 'P2002') {
+      // Prisma unique constraint violation
+      return res.status(400).json({ error: 'Email already exists' })
+    }
+    res.status(500).json({ error: 'Server error' })
   }
-  users.push(newUser)
-  res.status(201).json(newUser)
-})
-app.delete('/users/:id', (req: Request, res: Response) => {
-  const { id } = req.params
-
-  const userId = Number(id)
-  if (isNaN(userId)) {
-    return res.status(400).json({ error: 'Invalid user ID' })
-  }
-
-  const userIndex = users.findIndex((user) => user.id === userId)
-  if (userIndex === -1) {
-    return res.status(404).json({ error: 'User not found' })
-  }
-
-  const deletedUser = users.splice(userIndex, 1)[0]
-
-  res.json({ message: 'User deleted successfully', user: deletedUser })
 })
 
-app.get('/users', (_req: Request, res: Response) => {
+// GET all users
+app.get('/users', async (_req: Request, res: Response) => {
+  const users = await prisma.user.findMany()
   res.json(users)
 })
 
-app.put('/users/:id', (req: Request, res: Response) => {
-  const { id } = req.params
+// UPDATE user
+app.put('/users/:id', async (req: Request, res: Response) => {
+  const userId = Number(req.params.id)
   const { name, email } = req.body
+  if (isNaN(userId)) return res.status(400).json({ error: 'Invalid user ID' })
 
-  const userId = Number(id)
-  if (isNaN(userId)) {
-    return res.status(400).json({ error: 'Invalid user ID' })
-  }
-
-  const userIndex = users.findIndex((user) => userId === userId)
-  if (userIndex === -1) {
-    return res.status(404).json({ error: 'Invalider user ID' })
-  }
-
-  if (name) users[userIndex].name = name
-  if (email) {
-    const emailExists = users.some(
-      (user, index) => user.email === email && index !== userIndex
-    )
-    if (emailExists) {
+  try {
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: { name, email }
+    })
+    res.json(user)
+  } catch (error: any) {
+    if (error.code === 'P2025')
+      return res.status(404).json({ error: 'User not found' })
+    if (error.code === 'P2002')
       return res.status(400).json({ error: 'Email already exists' })
-    }
-    users[userIndex].email = email
+    res.status(500).json({ error: 'Server error' })
   }
+})
 
-  res.json(users[userIndex])
+// DELETE user
+app.delete('/users/:id', async (req: Request, res: Response) => {
+  const userId = Number(req.params.id)
+  if (isNaN(userId)) return res.status(400).json({ error: 'Invalid user ID' })
+
+  try {
+    const user = await prisma.user.delete({ where: { id: userId } })
+    res.json({ message: 'User deleted successfully', user })
+  } catch (error: any) {
+    if (error.code === 'P2025')
+      return res.status(404).json({ error: 'User not found' })
+    res.status(500).json({ error: 'Server error' })
+  }
 })
 
 app.listen(PORT, () => {
