@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express"
+import express, { Request, Response } from 'express'
 
 const app = express()
 const PORT = 3000
@@ -13,17 +13,17 @@ type User = {
 
 let users: User[] = []
 
-app.get("/", (_req: Request, res: Response) => {
-  res.json({ message: "Server Running" })
+app.get('/', (_req: Request, res: Response) => {
+  res.json({ message: 'Server Running' })
 })
 
-app.post("/users", (req: Request, res: Response) => {
+app.post('/users', (req: Request, res: Response) => {
   const { name, email } = req.body
   if (!name || !email) {
-    return res.status(400).json({ error: "Name and email are required" })
+    return res.status(400).json({ error: 'Name and email are required' })
   }
-  if (users.some(user => user.email === email)) {
-    return res.status(400).json({ error: "Email already exists" })
+  if (users.some((user) => user.email === email)) {
+    return res.status(400).json({ error: 'Email already exists' })
   }
 
   const newUser: User = {
@@ -35,8 +35,37 @@ app.post("/users", (req: Request, res: Response) => {
   res.status(201).json(newUser)
 })
 
-app.get("/users", (_req: Request, res: Response) => {
+app.get('/users', (_req: Request, res: Response) => {
   res.json(users)
+})
+
+app.put('/users/:id', (req: Request, res: Response) => {
+  const { id } = req.params
+  const { name, email } = req.body
+
+  const userId = Number(id)
+  if (isNaN(userId)) {
+    return res.status(400).json({ error: 'Invalid user ID' })
+  }
+
+  const userIndex = users.findIndex((user) => userId === userId)
+  if (userIndex === -1) {
+    return res.status(404).json({ error: 'Invalider user ID' })
+  }
+
+  if (name) users[userIndex].name = name
+  if (email) {
+    // Check if the new email already exists in another user
+    const emailExists = users.some(
+      (user, index) => user.email === email && index !== userIndex
+    )
+    if (emailExists) {
+      return res.status(400).json({ error: 'Email already exists' })
+    }
+    users[userIndex].email = email
+  }
+
+  res.json(users[userIndex])
 })
 
 app.listen(PORT, () => {
