@@ -34,6 +34,23 @@ app.post('/users', (req: Request, res: Response) => {
   users.push(newUser)
   res.status(201).json(newUser)
 })
+app.delete('/users/:id', (req: Request, res: Response) => {
+  const { id } = req.params
+
+  const userId = Number(id)
+  if (isNaN(userId)) {
+    return res.status(400).json({ error: 'Invalid user ID' })
+  }
+
+  const userIndex = users.findIndex((user) => user.id === userId)
+  if (userIndex === -1) {
+    return res.status(404).json({ error: 'User not found' })
+  }
+
+  const deletedUser = users.splice(userIndex, 1)[0]
+
+  res.json({ message: 'User deleted successfully', user: deletedUser })
+})
 
 app.get('/users', (_req: Request, res: Response) => {
   res.json(users)
