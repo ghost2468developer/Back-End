@@ -19,7 +19,9 @@
   },
   "homepage": "https://github.com/ghost2468developer/Back-End#readme",
   "dependencies": {
-    "express": "^5.2.1"
+    "@prisma/client": "^7.3.0",
+    "express": "^5.2.1",
+    "prisma": "^7.3.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
