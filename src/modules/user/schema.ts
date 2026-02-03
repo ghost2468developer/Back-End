@@ -10,12 +10,10 @@ export const schema = gql`
     createdAt: String!
     updatedAt: String!
   }
-
   type Query {
     user: [User!]!
     useraccount(id: ID!): User!
   }
-
   type Mutation {
     createUser(
       name: String!
@@ -23,7 +21,6 @@ export const schema = gql`
       password: String!
       number: String!
     ): User!
-
     updateUser(
       id: ID!
       name: String
@@ -31,6 +28,5 @@ export const schema = gql`
       password: String
       number: String
     ): User!
-
     deleteUser(id: ID!): User!
   }`

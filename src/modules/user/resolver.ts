@@ -25,7 +25,6 @@ export const resolver = {
         }
       })
     },
-
     updateUser: (
       _: unknown,
       args: { id: string; name?: string; email?: string; password?: string; number?: string }
@@ -36,7 +35,6 @@ export const resolver = {
         data
       })
     },
-
     deleteUser: (_: unknown, args: { id: string }) => {
       return prisma.user.delete({
         where: { id: Number(args.id) }
